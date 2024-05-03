@@ -11,9 +11,12 @@ import Reminder from "./reminder";
 import Login from "./login";
 import Register from "./Register";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { useSelector } from "react-redux";
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!useSelector((state) => state.login.token)
+  );
 
   const router = createBrowserRouter([
     {

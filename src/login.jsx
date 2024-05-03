@@ -7,44 +7,28 @@ import Navbar from "./komponen/navbar";
 import { useNavigate } from "react-router-dom";
 import GoogleLogin from "./GoogleLogin";
 import { FaGoogle } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { responseLogin } from "./redux/action/dataLogin";
+import {
+  clearRegister,
+  logout,
+  setEmail,
+  setPassword,
+} from "./redux/reducer/reducerLogin";
 
 export default function Login() {
+  const message = useSelector((state) => state.register.messege);
   const navigate = useNavigate();
+  const cekState = useSelector((state) => state);
+  const token = useSelector((state) => state.login.token);
+  const email = useSelector((state) => state.login.editEmail);
+  const password = useSelector((state) => state.login.editPassword);
+  console.log("cek state", cekState);
+  console.log("token", token);
 
-  const [data, setData] = useState([]);
-  const [editEmail, setEmail] = useState("");
-  const [editPassword, setPassword] = useState("");
-  const [items, setItems] = useState("");
+  const dispatch = useDispatch();
   const [type, setType] = useState("password");
   const [icon, setIcon] = useState(eye);
-  const [message, setMessage] = useState("");
-
-  const login = async () => {
-    try {
-      const response = await axios.post(
-        `https://shy-cloud-3319.fly.dev/api/v1/auth/login`,
-        {
-          email: editEmail,
-          password: editPassword,
-        }
-      );
-
-      setData(response.data?.data);
-      if (response.status === 200) {
-        localStorage.setItem("login", "login");
-        localStorage.setItem("token", response.data?.data?.token);
-        navigate("/", {
-          state: { token: response.data?.data?.token },
-        });
-      } else {
-        alert("password atau username salah");
-      }
-      setMessage("Login successful");
-    } catch (error) {
-      setMessage("Login failed because " + error.response.data.message);
-      console.error("An error occurred:", error);
-    }
-  };
 
   const lihatPassword = (e) => {
     if (type === "password") {
@@ -55,15 +39,7 @@ export default function Login() {
       setType("password");
     }
   };
-  useEffect(() => {
-    const items = localStorage.getItem("token");
-    if (items) {
-      setItems(items);
-    }
-  }, [items]);
-  console.log("token", items);
-  console.log("email", editEmail);
-  console.log("cek data", data);
+
   return (
     <div className="bg-[#0C121F]">
       <Navbar />
@@ -86,13 +62,15 @@ export default function Login() {
               Email
             </label>
             <input
-              value={editEmail}
+              value={email}
               type="email"
               id="email"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
               placeholder="Email"
               required
-              onChange={(e) => setEmail(e?.target?.value)}
+              onChange={(e) => {
+                dispatch(setEmail(e?.target?.value));
+              }}
             />
           </div>
           <div class="mb-5 relative">
@@ -103,13 +81,15 @@ export default function Login() {
               Password
             </label>
             <input
-              value={editPassword}
+              value={password}
               type={type}
               id="password"
               placeholder="Password"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
               required
-              onChange={(e) => setPassword(e?.target?.value)}
+              onChange={(e) => {
+                dispatch(setPassword(e?.target?.value));
+              }}
             />
 
             <span onClick={(e) => lihatPassword(e?.target?.value)}>
@@ -124,7 +104,7 @@ export default function Login() {
             type="submit"
             onClick={(e) => {
               e?.preventDefault();
-              login(e?.target.value);
+              dispatch(responseLogin(navigate));
             }}
             class="text-white w-96  bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
@@ -144,6 +124,7 @@ export default function Login() {
           <span class="block  text-black sm:text-center mt-5  ">
             Belum punya akun?{" "}
             <a
+              onClick={() => dispatch(clearRegister())}
               href="/register"
               class="hover:underline  text-blue-600 hover:text-blue-700"
             >

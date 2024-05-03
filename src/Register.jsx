@@ -5,52 +5,28 @@ import { Icon } from "react-icons-kit";
 import { eyeClosed } from "react-icons-kit/oct/eyeClosed";
 import { eye } from "react-icons-kit/oct/eye";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
+import { responseRegister } from "./redux/action/dataRegister";
+import {
+  clearLogin,
+  setEmail,
+  setName,
+  setPassword,
+} from "./redux/reducer/reducerLogin";
 
 export default function Register() {
+  const message = useSelector((state) => state.register.messege);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const editEmail = useSelector((state) => state.register.editEmail);
+  const editName = useSelector((state) => state.register.editName);
+  const editPassword = useSelector((state) => state.register.editPassword);
 
-  const [data, setData] = useState([]);
-  const [editEmail, setEditEmail] = useState("");
-  const [editName, setEditNAme] = useState("");
-  const [editPassword, setEditPassword] = useState("");
+  const cekState = useSelector((state) => state);
+  console.log("cekState", cekState);
   const [icon, setIcon] = useState(eye);
   const [type, setType] = useState("password");
-  const [message, setMessage] = useState("");
-
-  const responseRegister = async () => {
-    try {
-      const response = await axios.post(
-        `https://shy-cloud-3319.fly.dev/api/v1/auth/register`,
-        {
-          email: editEmail,
-          name: editName,
-          password: editPassword,
-          headers: { "content-type": "application/json" },
-        }
-      );
-
-      console.log("cek", response.data);
-      setData(response);
-      if (response?.data !== null) {
-        setMessage("Register successful");
-        navigate("/login");
-      } else {
-        setMessage(
-          "Register failed. Please check your credentials. " +
-            responseRegister.data.message
-        );
-      }
-    } catch (error) {
-      alert("blok goblok " + error.response.data.message);
-      console.error("An error occurred:", error);
-    }
-  };
-
-  //   useEffect(() => {
-  //     responseRegister();
-  //   }, []);
-
-  console.log("Data", data);
 
   const lihatPassword = (e) => {
     if (type === "password") {
@@ -82,7 +58,7 @@ export default function Register() {
             <input
               type="text"
               value={editEmail}
-              onChange={(e) => setEditEmail(e?.target.value)}
+              onChange={(e) => dispatch(setEmail(e?.target.value))}
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
               placeholder="Email"
               required
@@ -95,7 +71,7 @@ export default function Register() {
             <input
               type="text"
               value={editName}
-              onChange={(e) => setEditNAme(e?.target.value)}
+              onChange={(e) => dispatch(setName(e?.target.value))}
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
               placeholder="Name"
               required
@@ -115,7 +91,7 @@ export default function Register() {
               placeholder="Password"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
               required
-              onChange={(e) => setEditPassword(e?.target?.value)}
+              onChange={(e) => dispatch(setPassword(e?.target?.value))}
             />
             <span onClick={(e) => lihatPassword(e?.target?.value)}>
               <Icon
@@ -128,7 +104,7 @@ export default function Register() {
           <button
             onClick={(e) => {
               e?.preventDefault();
-              responseRegister(e?.target?.value);
+              dispatch(responseRegister(navigate));
             }}
             class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
@@ -137,6 +113,7 @@ export default function Register() {
           <span class="block  text-black sm:text-center mt-5  ">
             Sudah punya akun?{" "}
             <a
+              onClick={dispatch(clearLogin())}
               href="/login"
               class="hover:underline  text-blue-600 hover:text-blue-700"
             >
@@ -148,7 +125,7 @@ export default function Register() {
             {message && (
               <p
                 className={`text-md ${
-                  message.includes("berhasil")
+                  message.includes("successful")
                     ? "text-green-600"
                     : "text-red-600"
                 }`}

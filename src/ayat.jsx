@@ -1,32 +1,28 @@
 import axios from "axios";
 import Navbar from "./komponen/navbar";
 import React, { useEffect, useState } from "react";
+import { setNomor } from "./redux/reducer/dataReducer";
+import { useDispatch, useSelector } from "react-redux";
+import { getAyah } from "./redux/action/dataAction";
 
 export default function ayat() {
-  const [nomor, setNomor] = useState("1");
-  const [editAyah, setEditAyah] = useState([]);
-
-  const Ayah = async () => {
-    try {
-      const response = await axios.get(
-        `http://api.alquran.cloud/v1/ayah/${nomor}/ar.alafasy`
-      );
-      console.log("cek", response.data);
-      setEditAyah(response.data.data);
-    } catch (err) {
-      console.log("error fetching data: ", err);
-    }
-  };
+  const dispatch = useDispatch();
+  const number = useSelector((state) => state.data.nomor);
+  console.log("cek number", number);
+  const editAyah = useSelector((state) => state.data.editAyah);
+  console.log("cek red ayah", editAyah);
 
   useEffect(() => {
-    Ayah();
-  }, [nomor]);
+    dispatch(getAyah());
+  }, []);
 
   console.log("ayat", editAyah);
-  console.log("cek nmr", nomor);
+
+  const cekToken = useSelector((state) => state.data.token);
 
   const isLoggedIn = () => {
-    return localStorage.getItem("token") !== null;
+    // return localStorage.getItem("token") !== null;
+    return cekToken !== null;
   };
 
   return (
@@ -50,6 +46,7 @@ export default function ayat() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
+                  window.location.reload();
                 }}
                 className="max-w-md mx-auto"
               >
@@ -81,7 +78,7 @@ export default function ayat() {
                     type="number"
                     className="block w-full h-12 p-4 ps-10 text-sm text-gray-200 border border-gray-600 rounded-lg bg-gray-800 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="Cari no ayat al-quran"
-                    value={nomor}
+                    value={number}
                     onChange={(e) => {
                       if (isLoggedIn()) {
                         const inputValue = e.target.value;
@@ -89,9 +86,9 @@ export default function ayat() {
                           alert(
                             "Astaghfirullah, sini tak kasih paham wahai pendosaa..wahai orang yang beriman, menurut riwayat Hafs dari Imam `Asim bahwasanya Ayat Alquran itu berjumlah 6.236."
                           );
-                          setNomor("1");
+                          dispatch(setNomor("1"));
                         } else {
-                          setNomor(inputValue);
+                          dispatch(setNomor(inputValue));
                         }
                       } else {
                         alert("Anda harus login terlebih dahulu");

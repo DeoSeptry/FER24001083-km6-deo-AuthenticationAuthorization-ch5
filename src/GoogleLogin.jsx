@@ -2,8 +2,13 @@ import React from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setToken } from "./redux/reducer/reducerLogin";
 
 function GoogleLogin({ buttonText }) {
+  const cekState = useSelector((state) => state);
+  console.log("cekState", cekState);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const registerLoginWithGoogleAction = async (accessToken) => {
     console.log("token ", accessToken);
@@ -25,7 +30,7 @@ function GoogleLogin({ buttonText }) {
       const response = await axios.request(config);
       const { token } = response.data.data;
       console.log("response.data ", response.data);
-      localStorage.setItem("token", token);
+      dispatch(setToken(token));
       navigate("/", { state: { token: token } });
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -34,9 +39,10 @@ function GoogleLogin({ buttonText }) {
     }
   };
 
+  const token = useSelector((state) => state.login.token);
+  console.log("token", token);
   const loginWithGoogle = useGoogleLogin({
     onSuccess: (responseGoogle) => {
-      localStorage.setItem("login", "google function");
       registerLoginWithGoogleAction(responseGoogle.access_token);
     },
   });

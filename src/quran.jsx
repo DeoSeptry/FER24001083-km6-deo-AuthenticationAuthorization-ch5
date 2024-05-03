@@ -3,24 +3,19 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Dropdown, List } from "flowbite-react";
 import Navbar from "./komponen/navbar";
+import { getQuran } from "./redux/action/dataAction";
+import { useDispatch, useSelector } from "react-redux";
+import { setSurahId } from "./redux/reducer/dataReducer";
 
 export default function Quran() {
   const navigate = useNavigate();
-  const [surah, setSurah] = useState([]);
+  const surah = useSelector((state) => state.data.surah);
+
+  const dispatch = useDispatch();
   const [search, setSearch] = useState("");
 
-  const quran = async () => {
-    try {
-      const response = await axios.get(`http://api.alquran.cloud/v1/surah`);
-      console.log("cek", response.data);
-      setSurah(response.data.data);
-    } catch (err) {
-      console.log("error fetching data: ", err);
-    }
-  };
-
   useEffect(() => {
-    quran();
+    dispatch(getQuran());
   }, []);
 
   console.log("cek surah", surah);
@@ -84,6 +79,7 @@ export default function Quran() {
                         navigate("quran-details", {
                           state: { number: e?.number },
                         });
+                        dispatch(setSurahId(e?.number));
                       }}
                     >
                       <div className="flex items-center gap-4 bg">
@@ -114,6 +110,7 @@ export default function Quran() {
                 key={e?.number}
                 onClick={() => {
                   navigate("quran-details", { state: { number: e?.number } });
+                  dispatch(setSurahId(e?.number));
                 }}
               >
                 <div className="flex items-center gap-4">

@@ -3,71 +3,33 @@ import Navbar from "./komponen/navbar";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaPlay, FaPauseCircle } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { getQuranDetail, getTerjemahan } from "./redux/action/dataAction";
+import {
+  setDetail,
+  setSurahId,
+  setBahasa,
+  setArti,
+} from "./redux/reducer/dataReducer";
 
 export default function QuranDetail() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [detail, setDetail] = useState([]);
-  const [arti, setArti] = useState([]);
-  const [bahasa, setBahasa] = useState("id.indonesian");
+
+  const dispatch = useDispatch();
+  const surah = useSelector((state) => state.data.surah);
+  const id = useSelector((state) => state.data.surahId);
+  const arti = useSelector((state) => state.data.arti);
+  console.log("id", id);
   const [audioStates, setAudioStates] = useState({});
-  const [surah, setSurah] = useState([]);
-  const [dataNomor, setDataNomor] = useState(location?.state?.number);
 
-  console.log(" sadad", dataNomor);
+  const detail = useSelector((state) => state.data.detail);
 
-  const quranDetail = async (nomor) => {
-    console.log("numer", location?.state);
-    try {
-      const response = await axios.get(
-        `http://api.alquran.cloud/v1/surah/${dataNomor}/ar.alafasy`
-      );
-      console.log("cek", response?.data?.data);
-      setDetail(response?.data?.data);
-    } catch (err) {
-      console.log("error fetching data: ", err);
-    }
-  };
-  //   const quranDetail2 = async (nomor) => {
-  //     console.log("numer", nomor);
-  //     try {
-  //       const response = await axios.get(
-  //         `http://api.alquran.cloud/v1/surah/${nomor}/ar.alafasy`
-  //       );
-  //       console.log("cek", response.data.data);
-  //       setDetail(response?.data.data);
-  //     } catch (err) {
-  //       console.log("error fetching data: ", err);
-  //     }
-  //   };
-
-  const terjemahan = async () => {
-    try {
-      const response = await axios.get(
-        `http://api.alquran.cloud/v1/surah/${dataNomor}/${bahasa}`
-      );
-      console.log("arti", response.data);
-      setArti(response.data.data);
-    } catch (err) {
-      console.log("error fetching data: ", err);
-    }
-  };
-
-  const quran = async () => {
-    try {
-      const response = await axios.get(`http://api.alquran.cloud/v1/surah`);
-      console.log("cek", response.data);
-      setSurah(response.data.data);
-    } catch (err) {
-      console.log("error fetching data: ", err);
-    }
-  };
+  console.log("titit", detail);
 
   useEffect(() => {
-    quranDetail();
-    terjemahan();
-    quran();
-  }, [bahasa]);
+    dispatch(getQuranDetail());
+    dispatch(getTerjemahan());
+  }, []);
 
   const stopAudio = (audioUrl) => {
     audioStates[audioUrl].pause();
@@ -107,10 +69,22 @@ export default function QuranDetail() {
     }
   };
 
+  const cekToken = useSelector((state) => state.login.token);
   const isLoggedIn = () => {
-    return localStorage.getItem("token") !== null;
+    // return localStorage.getItem("token") !== null;
+    return cekToken !== null;
   };
 
+  const handleLanguage = (event) => {
+    const selectedLanguage = event.target.value;
+    dispatch(setBahasa(selectedLanguage)); // Pass the selected language as payload
+    window.location.reload();
+    console.log("languageState", selectedLanguage);
+  };
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    window.location.reload();
+  };
   return (
     <div className=" bg-[#0C121F]">
       <Navbar />
@@ -118,14 +92,20 @@ export default function QuranDetail() {
       <div className="mx-96 mb-20 mt-10 text-gray-200 mt">
         {/* pilih bahasa terjemahan */}
         <div className="flex justify-between items-center">
-          <select
-            onChange={(e) => setBahasa(e.target.value)}
-            value={bahasa}
-            className="select-cst bg-gray-800 rounded-xl"
-          >
-            <option value="en.sarwar">English</option>
-            <option value="id.indonesian">Indonesian</option>
-          </select>
+          <form>
+            <select
+              onChange={handleLanguage}
+              value={""}
+              className="select-cst bg-gray-800 rounded-xl"
+            >
+              <option value="" disabled hidden>
+                Language
+              </option>
+              <option value="en.sarwar">English</option>
+              <option value="id.indonesian">Indonesian</option>
+            </select>
+            {/* <button type="submit">submit</button> */}
+          </form>
           <div className="flex flex-col items-center gap-2">
             {/* <div className="font-semibold text-2xl">{detail?.name}</div> */}
             <div className="text-xl font-semibold">{detail?.englishName}</div>
@@ -173,14 +153,6 @@ export default function QuranDetail() {
                       )}
                     </button>
                   </div>
-                  {/* <div className="customAudio">
-                    <audio controls>
-                      <source
-                        src={Object.keys(audioStates)?.[0]}
-                        type="audi0/mpeg"
-                      />{" "}
-                    </audio>
-                  </div> */}
                 </div>
               );
             })}
@@ -192,7 +164,8 @@ export default function QuranDetail() {
                 className="  py-2 px-2 flex justify-between items-center bg-gray-800 hover:bg-gray-600"
                 key={e?.number}
                 onClick={() => {
-                  setDataNomor(e?.number), quranDetail(), terjemahan();
+                  dispatch(setSurahId(e?.number)), dispatch(getTerjemahan());
+                  window.location.reload();
                 }}
               >
                 <div className="flex items-center gap-4">

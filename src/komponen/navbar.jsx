@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { logout } from "../redux/reducer/reducerLogin";
 
 function navbar() {
   const navigate = useNavigate();
-
-  const [items, setItems] = useState("");
+  const dispatch = useDispatch();
+  const items = useSelector((state) => state.login.token);
+  // const [items, setItems] = useState("");
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -19,10 +22,7 @@ function navbar() {
   const handleLogout = () => {
     const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (confirmLogout) {
-      localStorage.removeItem("token");
-      setData([]);
-      setItems("");
-      navigate("/");
+      dispatch(logout());
     }
   };
 
