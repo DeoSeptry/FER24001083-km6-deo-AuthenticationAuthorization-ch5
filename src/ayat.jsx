@@ -27,6 +27,7 @@ export default function ayat() {
 
   return (
     <div className="">
+      <div></div>
       <Navbar />
       <div className="mx-96 text-gray-200 mt-10">
         <div className=" flex justify-center">
